@@ -1,0 +1,15 @@
+How to create persistent cache
+==============================
+
+EnhanceIO caches are persistent by default. A udev rule file named
+94-enhanceio-<cache_name>.rules is created, removed by create, delete
+sub-commands in eio_cli.
+
+Note
+------
+1) Creating a writeback cache on root device is not supported. This is because
+   the root device is mounted as read only prior to the processing of udev
+   rules.
+ 
+2) For certain devices such as loop device the udev rule file will not be
+   generated
