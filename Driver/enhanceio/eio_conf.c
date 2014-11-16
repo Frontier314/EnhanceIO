@@ -34,7 +34,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Includes fix for Linux >=3.17 from https://github.com/stec-inc/EnhanceIO/pull/84/files */
+/* Changelog:
+ * 
+ * 20141017: fix for Linux >=3.17 from https://github.com/stec-inc/EnhanceIO/pull/84/files
+ * 
+ * 20141116: changed Linux 3.18 deprecated functions smp_mb__after_clear_bit -> smp_mb__after_atomic
+ * 
+*/
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -1854,7 +1860,7 @@ init:
 	dmc->next_cache = cache_list_head;
 	cache_list_head = dmc;
 	clear_bit(EIO_UPDATE_LIST, (void *)&eio_control->synch_flags);
-	smp_mb__after_clear_bit();
+	smp_mb__after_atomic();
 	wake_up_bit((void *)&eio_control->synch_flags, EIO_UPDATE_LIST);
 
 	prev_set = -1;
@@ -1919,7 +1925,7 @@ bad6:
 		nodepp = &((*nodepp)->next_cache);
 	}
 	clear_bit(EIO_UPDATE_LIST, (void *)&eio_control->synch_flags);
-	smp_mb__after_clear_bit();
+	smp_mb__after_atomic();
 	wake_up_bit((void *)&eio_control->synch_flags, EIO_UPDATE_LIST);
 bad5:
 	eio_kcached_client_destroy(dmc);
@@ -2073,7 +2079,7 @@ force_delete:
 		nodepp = &((*nodepp)->next_cache);
 	}
 	clear_bit(EIO_UPDATE_LIST, &eio_control->synch_flags);
-	smp_mb__after_clear_bit();
+	smp_mb__after_atomic();
 	wake_up_bit((void *)&eio_control->synch_flags, EIO_UPDATE_LIST);
 
 out:
@@ -2398,7 +2404,7 @@ eio_notify_reboot(struct notifier_block *this, unsigned long code, void *x)
 			       TASK_UNINTERRUPTIBLE);
 	if (eio_reboot_notified == EIO_REBOOT_HANDLING_DONE) {
 		clear_bit(EIO_HANDLE_REBOOT, (void *)&eio_control->synch_flags);
-		smp_mb__after_clear_bit();
+		smp_mb__after_atomic();
 		wake_up_bit((void *)&eio_control->synch_flags,
 			    EIO_HANDLE_REBOOT);
 		return NOTIFY_DONE;
@@ -2426,12 +2432,12 @@ eio_notify_reboot(struct notifier_block *this, unsigned long code, void *x)
 		eio_md_store(dmc);
 	}
 	clear_bit(EIO_UPDATE_LIST, (void *)&eio_control->synch_flags);
-	smp_mb__after_clear_bit();
+	smp_mb__after_atomic();
 	wake_up_bit((void *)&eio_control->synch_flags, EIO_UPDATE_LIST);
 
 	eio_reboot_notified = EIO_REBOOT_HANDLING_DONE;
 	clear_bit(EIO_HANDLE_REBOOT, (void *)&eio_control->synch_flags);
-	smp_mb__after_clear_bit();
+	smp_mb__after_atomic();
 	wake_up_bit((void *)&eio_control->synch_flags, EIO_HANDLE_REBOOT);
 	return NOTIFY_DONE;
 }

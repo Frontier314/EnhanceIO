@@ -25,7 +25,13 @@
  *
  */
 
-/* Includes fix for Linux >=3.17 from https://github.com/stec-inc/EnhanceIO/pull/84/files */
+/* Changelog:
+ * 
+ * 20141017: fix for Linux >=3.17 from https://github.com/stec-inc/EnhanceIO/pull/84/files
+ * 
+ * 20141116: changed Linux 3.18 deprecated functions smp_mb__after_clear_bit -> smp_mb__after_atomic
+ * 
+ */
 
 #include <linux/blkdev.h>
 #include <linux/module.h>
@@ -1510,7 +1516,7 @@ int eio_reboot_handling(void)
 			       TASK_UNINTERRUPTIBLE);
 	if (eio_reboot_notified == EIO_REBOOT_HANDLING_DONE) {
 		clear_bit(EIO_HANDLE_REBOOT, (void *)&eio_control->synch_flags);
-		smp_mb__after_clear_bit();
+		smp_mb__after_atomic();
 		wake_up_bit((void *)&eio_control->synch_flags,
 			    EIO_HANDLE_REBOOT);
 		return 0;
@@ -1612,7 +1618,7 @@ int eio_reboot_handling(void)
 
 	eio_reboot_notified = EIO_REBOOT_HANDLING_DONE;
 	clear_bit(EIO_HANDLE_REBOOT, (void *)&eio_control->synch_flags);
-	smp_mb__after_clear_bit();
+	smp_mb__after_atomic();
 	wake_up_bit((void *)&eio_control->synch_flags, EIO_HANDLE_REBOOT);
 	return 0;
 }
