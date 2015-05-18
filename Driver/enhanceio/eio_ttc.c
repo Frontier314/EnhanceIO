@@ -25,14 +25,6 @@
  *
  */
 
-/* Changelog:
- * 
- * 20141017: fix for Linux >=3.17 from https://github.com/stec-inc/EnhanceIO/pull/84/files
- * 
- * 20141116: changed Linux 3.18 deprecated functions smp_mb__after_clear_bit -> smp_mb__after_atomic
- * 
- */
-
 #include <linux/blkdev.h>
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -44,9 +36,13 @@
 #define wait_on_bit_lock_action wait_on_bit_lock
 #endif
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0))
+#define smp_mb__after_atomic smp_mb__after_clear_bit
+#endif
+
+
 static struct rw_semaphore eio_ttc_lock[EIO_HASHTBL_SIZE];
 static struct list_head eio_ttc_list[EIO_HASHTBL_SIZE];
-
 
 int eio_reboot_notified;
 

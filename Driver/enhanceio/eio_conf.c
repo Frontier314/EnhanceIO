@@ -34,14 +34,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Changelog:
- * 
- * 20141017: fix for Linux >=3.17 from https://github.com/stec-inc/EnhanceIO/pull/84/files
- * 
- * 20141116: changed Linux 3.18 deprecated functions smp_mb__after_clear_bit -> smp_mb__after_atomic
- * 
-*/
-
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include "eio.h"
@@ -100,6 +92,7 @@ static struct notifier_block eio_ssd_rm_notifier = {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0))
 int eio_wait_schedule(struct wait_bit_key *unused)
 #else
+#define wait_on_bit_lock_action wait_on_bit_lock
 int eio_wait_schedule(void *unused)
 #endif
 {
@@ -107,6 +100,10 @@ int eio_wait_schedule(void *unused)
 	schedule();
 	return 0;
 }
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0))
+#define smp_mb__after_atomic smp_mb__after_clear_bit
+#endif
 
 /*
  * Check if the System RAM threshold > requested memory, don't care
