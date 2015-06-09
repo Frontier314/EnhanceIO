@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 #
 # Copyright (C) 2012 STEC, Inc. All rights not specifically granted
 # under a license included herein are reserved
@@ -305,10 +305,12 @@ class Cache_rec(Structure):
 
 	def do_eio_ioctl(self,IOC_TYPE):
 		#send ioctl to driver
-		fd = open(EIODEV, "r")
+		libc = CDLL('libc.so.6')
+		fd = os.open (EIODEV, os.O_RDWR, 0400)
 		fmt = ''
+		selfaddr = c_uint64(addressof(self))
 		try:
-			if ioctl(fd, IOC_TYPE, addressof(self)) == SUCCESS:
+			if libc.ioctl(fd, IOC_TYPE, selfaddr) == SUCCESS:
 				return SUCCESS
 		except Exception as e:
 			print e
